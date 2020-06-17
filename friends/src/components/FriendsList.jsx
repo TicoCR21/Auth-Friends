@@ -12,18 +12,27 @@ export default function FriendsList()
 {
   const [ friendsList, setFriendsList ] = useState( [] );
 
-  useEffect( () => 
+  const getFriends = () => 
   {
     axiosWithAuth().get( "/api/friends" )
         .then( response => setFriendsList( response.data ) )
         .catch( response => M.toast( { html : "Error: Token Expired!", classes : "deep-purple darken-4" } ) );
-  }, [] );
+  }
+
+  useEffect( getFriends, [] );
+
+  const deleteFriend = id => 
+  {
+    axiosWithAuth().delete( `/api/friends/${ id }` )
+        .then( response => { getFriends(); } )
+        .catch( response => M.toast( { html : "Error: Token Expired!", classes : "deep-purple darken-4" } ) );
+  }
 
   return (
     <div className = "container" style = { { marginTop : "30px" } }>
 
       { friendsList.length === 0 && <Preloader /> }
-      { friendsList.map( friend => <Friend key = { friend.id } friend = { friend } /> ) }
+      { friendsList.map( friend => <Friend key = { friend.id } friend = { friend } deleteFriend = { deleteFriend }/> ) }
 
       <FloatingButton />
       <AddFriendModal setFriendsList = { setFriendsList } />
